@@ -1,48 +1,62 @@
 package com.frictionscroll.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
-private val Orange = Color(0xFFFF6B35)
-private val DarkBackground = Color(0xFF1A1A2E)
-private val DarkSurface = Color(0xFF16213E)
+private val WarmCream = Color(0xFFF5EDE0)
+private val WarmBeige = Color(0xFFE8DCC8)
+private val Taupe = Color(0xFF8B7D6E)
+private val DarkTaupe = Color(0xFF5C524A)
+private val MutedSage = Color(0xFF9CAF94)
+private val SoftRose = Color(0xFFC4A4A0)
+private val OffWhite = Color(0xFFFAF7F2)
+private val MutedRed = Color(0xFFB85C5C)
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Orange,
-    secondary = Color(0xFFE55039),
-    tertiary = Color(0xFFFFC93C),
-    background = DarkBackground,
-    surface = DarkSurface,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onBackground = Color.White,
-    onSurface = Color.White,
-)
+private val WarmDarkBrown = Color(0xFF2C2622)
+private val WarmDarkSurface = Color(0xFF3D352E)
 
 private val LightColorScheme = lightColorScheme(
-    primary = Orange,
-    secondary = Color(0xFFE55039),
-    tertiary = Color(0xFFFFC93C),
+    primary = Taupe,
+    onPrimary = OffWhite,
+    secondary = MutedSage,
+    onSecondary = OffWhite,
+    tertiary = SoftRose,
+    onTertiary = OffWhite,
+    background = WarmCream,
+    onBackground = DarkTaupe,
+    surface = WarmBeige,
+    onSurface = DarkTaupe,
+    surfaceVariant = WarmBeige,
+    onSurfaceVariant = Taupe,
+    error = MutedRed,
+    onError = OffWhite,
+)
+
+private val DarkColorScheme = darkColorScheme(
+    primary = Taupe,
+    onPrimary = OffWhite,
+    secondary = MutedSage,
+    onSecondary = OffWhite,
+    tertiary = SoftRose,
+    onTertiary = OffWhite,
+    background = WarmDarkBrown,
+    onBackground = WarmCream,
+    surface = WarmDarkSurface,
+    onSurface = WarmCream,
+    surfaceVariant = WarmDarkSurface,
+    onSurfaceVariant = WarmBeige,
+    error = MutedRed,
+    onError = OffWhite,
 )
 
 @Composable
 fun FrictionScrollTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

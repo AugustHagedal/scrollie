@@ -4,8 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.frictionscroll.ui.config.BurstConfigScreen
-import com.frictionscroll.ui.debug.DebugScreen
+import com.frictionscroll.ui.config.SettingsScreen
+import com.frictionscroll.ui.debug.StatsScreen
+import com.frictionscroll.ui.disclosure.DisclosureScreen
 import com.frictionscroll.ui.home.HomeScreen
 import com.frictionscroll.ui.permissions.PermissionsScreen
 import com.frictionscroll.ui.picker.AppPickerScreen
@@ -13,9 +14,10 @@ import com.frictionscroll.ui.picker.AppPickerScreen
 object Routes {
     const val HOME = "home"
     const val APP_PICKER = "app_picker"
-    const val BURST_CONFIG = "burst_config"
+    const val SETTINGS = "settings"
     const val PERMISSIONS = "permissions"
-    const val DEBUG = "debug"
+    const val STATS = "stats"
+    const val DISCLOSURE = "disclosure"
 }
 
 @Composable
@@ -24,22 +26,26 @@ fun NavGraph(navController: NavHostController) {
         composable(Routes.HOME) {
             HomeScreen(
                 onNavigateToAppPicker = { navController.navigate(Routes.APP_PICKER) },
-                onNavigateToConfig = { navController.navigate(Routes.BURST_CONFIG) },
+                onNavigateToConfig = { navController.navigate(Routes.SETTINGS) },
                 onNavigateToPermissions = { navController.navigate(Routes.PERMISSIONS) },
-                onNavigateToDebug = { navController.navigate(Routes.DEBUG) }
+                onNavigateToStats = { navController.navigate(Routes.STATS) },
+                onNavigateToDisclosure = { navController.navigate(Routes.DISCLOSURE) }
             )
         }
         composable(Routes.APP_PICKER) {
             AppPickerScreen(onBack = { navController.popBackStack() })
         }
-        composable(Routes.BURST_CONFIG) {
-            BurstConfigScreen(onBack = { navController.popBackStack() })
+        composable(Routes.SETTINGS) {
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
         composable(Routes.PERMISSIONS) {
             PermissionsScreen(onBack = { navController.popBackStack() })
         }
-        composable(Routes.DEBUG) {
-            DebugScreen(onBack = { navController.popBackStack() })
+        composable(Routes.STATS) {
+            StatsScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.DISCLOSURE) {
+            DisclosureScreen(onBack = { navController.popBackStack() })
         }
     }
 }

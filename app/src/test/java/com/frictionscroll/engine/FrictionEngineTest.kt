@@ -18,7 +18,7 @@ class FrictionEngineTest {
     fun setUp() {
         clock = FakeClock(1_000_000L)
         engine = FrictionEngine(clock)
-        engine.configure(n = 5, windowSec = 10, cooldownMs = 2000L)
+        engine.configure(n = 5, windowSec = 10, cooldownMs = 15000L)
     }
 
     @Test
@@ -47,7 +47,7 @@ class FrictionEngineTest {
             engine.onScrollEvent(pkg)
             clock.advance(200)
         }
-        // Now within cooldown period, try to scroll again
+        // Now within cooldown period (15s), try to scroll again
         clock.advance(200)
         assertEquals(TriggerResult.COOLDOWN, engine.onScrollEvent(pkg))
     }
@@ -123,8 +123,8 @@ class FrictionEngineTest {
             engine.onScrollEvent(pkg)
             clock.advance(200)
         }
-        // Wait past cooldown
-        clock.advance(2500)
+        // Wait past 15s cooldown
+        clock.advance(16_000)
         // Should be able to build toward new trigger
         assertEquals(TriggerResult.NOT_READY, engine.onScrollEvent(pkg))
     }
@@ -139,5 +139,70 @@ class FrictionEngineTest {
         engine.reset()
         // After reset, starts fresh
         assertEquals(TriggerResult.NOT_READY, engine.onScrollEvent(pkg))
+    }
+
+    @Test
+    fun `4 triggers in 60s allowed, 5th returns RATE_LIMITED`() {
+        // Use short cooldown so 4 triggers fit within 60s window
+        engine.configure(n = 5, windowSec = 10, cooldownMs = 2000L)
+        val pkg = "com.example.app"
+        // Trigger 4 times within 60 seconds
+        for (t in 1..4) {
+            for (i in 1..5) {
+                engine.onScrollEvent(pkg)
+                clock.advance(200)
+            }
+            // Wait past 2s cooldown between triggers
+            clock.advance(2500)
+        }
+        // 5th trigger attempt — should be rate limited
+        for (i in 1..4) {
+            engine.onScrollEvent(pkg)
+            clock.advance(200)
+        }
+        assertEquals(TriggerResult.RATE_LIMITED, engine.onScrollEvent(pkg))
+    }
+
+    @Test
+    fun `rate limit resets after 60s window passes`() {
+        engine.configure(n = 5, windowSec = 10, cooldownMs = 2000L)
+        val pkg = "com.example.app"
+        // Trigger 4 times
+        for (t in 1..4) {
+            for (i in 1..5) {
+                engine.onScrollEvent(pkg)
+                clock.advance(200)
+            }
+            clock.advance(2500)
+        }
+        // Wait for 60s window to clear from the first trigger
+        clock.advance(60_000)
+        // Should be able to trigger again
+        for (i in 1..4) {
+            engine.onScrollEvent(pkg)
+            clock.advance(200)
+        }
+        assertEquals(TriggerResult.TRIGGERED, engine.onScrollEvent(pkg))
+    }
+
+    @Test
+    fun `rate limit resets on reset()`() {
+        engine.configure(n = 5, windowSec = 10, cooldownMs = 2000L)
+        val pkg = "com.example.app"
+        // Trigger 4 times
+        for (t in 1..4) {
+            for (i in 1..5) {
+                engine.onScrollEvent(pkg)
+                clock.advance(200)
+            }
+            clock.advance(2500)
+        }
+        engine.reset()
+        // After reset, should be able to trigger again
+        for (i in 1..4) {
+            engine.onScrollEvent(pkg)
+            clock.advance(200)
+        }
+        assertEquals(TriggerResult.TRIGGERED, engine.onScrollEvent(pkg))
     }
 }

@@ -11,7 +11,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,8 +28,7 @@ class ScrollFrictionAccessibilityService : AccessibilityService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private var selectedApps: Set<String> = emptySet()
-    private var enabled: Boolean = false
-    private var delayMs: Long = 2000L
+    private var enabled: Boolean = true
     private var currentForegroundPackage: String? = null
 
     override fun onServiceConnected() {
@@ -52,20 +50,16 @@ class ScrollFrictionAccessibilityService : AccessibilityService() {
             settingsStore.enabled.collect { enabled = it }
         }
         serviceScope.launch {
-            settingsStore.delayMs.collect { delayMs = it }
-        }
-        serviceScope.launch {
             settingsStore.snoozeUntil.collect { engine.setSnoozeUntil(it) }
         }
         serviceScope.launch {
             kotlinx.coroutines.flow.combine(
                 settingsStore.burstN,
-                settingsStore.burstWindowSec,
-                settingsStore.cooldownMs
-            ) { n, windowSec, cooldownMs ->
-                Triple(n, windowSec, cooldownMs)
-            }.collect { (n, windowSec, cooldownMs) ->
-                engine.configure(n, windowSec, cooldownMs)
+                settingsStore.burstWindowSec
+            ) { n, windowSec ->
+                Pair(n, windowSec)
+            }.collect { (n, windowSec) ->
+                engine.configure(n, windowSec, SettingsStore.FIXED_COOLDOWN_MS)
             }
         }
     }
@@ -87,6 +81,7 @@ class ScrollFrictionAccessibilityService : AccessibilityService() {
                 if (result == TriggerResult.TRIGGERED) {
                     onTrigger()
                 }
+                // RATE_LIMITED and COOLDOWN are no-ops
             }
         }
     }
@@ -99,7 +94,7 @@ class ScrollFrictionAccessibilityService : AccessibilityService() {
         }
 
         overlayController.show(
-            delayMs = delayMs,
+            delayMs = SettingsStore.FIXED_DELAY_MS,
             onDisable = {
                 serviceScope.launch { settingsStore.setEnabled(false) }
             },

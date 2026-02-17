@@ -5,6 +5,7 @@ enum class TriggerResult {
     DEBOUNCED,
     COOLDOWN,
     SNOOZED,
+    RATE_LIMITED,
     NOT_READY
 }
 
@@ -12,15 +13,17 @@ class FrictionEngine(private val clock: Clock) {
 
     private var burstN: Int = 5
     private var burstWindowMs: Long = 10_000L
-    var cooldownMs: Long = 2_000L
+    var cooldownMs: Long = 15_000L
         private set
     private val debounceMs: Long = 150L
+    private var maxTriggersPerMinute: Int = 4
 
     private var currentPackage: String? = null
     private val scrollTimestamps = mutableListOf<Long>()
     private var lastAcceptedScroll: Long = 0L
     private var lastTriggerTime: Long = 0L
     private var snoozeUntil: Long = 0L
+    private val triggerTimestamps = mutableListOf<Long>()
 
     fun configure(n: Int, windowSec: Int, cooldownMs: Long) {
         this.burstN = n
@@ -66,7 +69,14 @@ class FrictionEngine(private val clock: Clock) {
 
         // Check if burst threshold met
         return if (scrollTimestamps.size >= burstN) {
+            // Rate limit check: prune trigger timestamps older than 60s
+            triggerTimestamps.removeAll { it < now - 60_000L }
+            if (triggerTimestamps.size >= maxTriggersPerMinute) {
+                return TriggerResult.RATE_LIMITED
+            }
+
             lastTriggerTime = now
+            triggerTimestamps.add(now)
             scrollTimestamps.clear()
             TriggerResult.TRIGGERED
         } else {
@@ -80,5 +90,6 @@ class FrictionEngine(private val clock: Clock) {
         lastAcceptedScroll = 0L
         lastTriggerTime = 0L
         snoozeUntil = 0L
+        triggerTimestamps.clear()
     }
 }

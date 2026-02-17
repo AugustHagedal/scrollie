@@ -1,6 +1,7 @@
 package com.frictionscroll.ui.home
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,10 +37,11 @@ fun HomeScreen(
     onNavigateToAppPicker: () -> Unit,
     onNavigateToConfig: () -> Unit,
     onNavigateToPermissions: () -> Unit,
-    onNavigateToDebug: () -> Unit,
+    onNavigateToStats: () -> Unit,
+    onNavigateToDisclosure: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val enabled by viewModel.enabled.collectAsStateWithLifecycle(initialValue = false)
+    val enabled by viewModel.enabled.collectAsStateWithLifecycle(initialValue = true)
     val triggersToday by viewModel.triggersToday.collectAsStateWithLifecycle(initialValue = 0)
     val lastTriggerTime by viewModel.lastTriggerTime.collectAsStateWithLifecycle(initialValue = 0L)
     val selectedApps by viewModel.selectedApps.collectAsStateWithLifecycle(initialValue = emptySet())
@@ -51,7 +53,7 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("FrictionScroll") })
+            TopAppBar(title = { Text("frictionscroll") })
         }
     ) { padding ->
         Column(
@@ -62,16 +64,19 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Master toggle
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp)
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(20.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Friction Enabled", style = MaterialTheme.typography.titleMedium)
+                        Text("awareness pause", style = MaterialTheme.typography.titleMedium)
                         Text(
                             "${selectedApps.size} app(s) selected",
                             style = MaterialTheme.typography.bodySmall
@@ -85,27 +90,33 @@ fun HomeScreen(
             }
 
             // Permission status
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Permissions", style = MaterialTheme.typography.titleMedium)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text("permissions", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        PermissionChip(label = "Overlay", granted = hasOverlay)
-                        PermissionChip(label = "Service", granted = hasAccessibility)
+                        PermissionChip(label = "overlay", granted = hasOverlay)
+                        PermissionChip(label = "service", granted = hasAccessibility)
                     }
                 }
             }
 
             // Stats
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Today", style = MaterialTheme.typography.titleMedium)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text("today", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Triggers: $triggersToday")
+                    Text("pauses: $triggersToday")
                     if (lastTriggerTime > 0) {
                         val timeStr = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
                             .format(Date(lastTriggerTime))
-                        Text("Last trigger: $timeStr")
+                        Text("last pause: $timeStr")
                     }
                 }
             }
@@ -113,23 +124,33 @@ fun HomeScreen(
             // Navigation buttons
             Button(
                 onClick = onNavigateToAppPicker,
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("Select Apps") }
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) { Text("select apps") }
 
             Button(
                 onClick = onNavigateToConfig,
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("Configure Burst Settings") }
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) { Text("settings") }
 
             OutlinedButton(
                 onClick = onNavigateToPermissions,
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("Permissions") }
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) { Text("permissions") }
 
             OutlinedButton(
-                onClick = onNavigateToDebug,
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("Debug Info") }
+                onClick = onNavigateToStats,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) { Text("stats") }
+
+            OutlinedButton(
+                onClick = onNavigateToDisclosure,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) { Text("about this app") }
         }
     }
 }
@@ -140,7 +161,7 @@ private fun PermissionChip(label: String, granted: Boolean) {
     else MaterialTheme.colorScheme.error
     SuggestionChip(
         onClick = {},
-        label = { Text("$label: ${if (granted) "OK" else "Missing"}") },
+        label = { Text("$label: ${if (granted) "ok" else "missing"}") },
         colors = SuggestionChipDefaults.suggestionChipColors(
             containerColor = color.copy(alpha = 0.15f),
             labelColor = color

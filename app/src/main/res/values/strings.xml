@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">FrictionScroll</string>
-    <string name="accessibility_service_description">FrictionScroll monitors scroll events in your selected apps to detect rapid scrolling patterns. It does NOT read text content, keystrokes, messages, or any personal data.</string>
+    <string name="accessibility_service_description">FrictionScroll monitors scroll events in your selected apps to detect rapid scrolling patterns. It does not read text content, keystrokes, messages, or any personal data.</string>
 </resources>

@@ -29,12 +29,17 @@ class SettingsStore @Inject constructor(
         val LAST_TRIGGER_DATE = stringPreferencesKey("last_trigger_date")
     }
 
+    companion object {
+        const val FIXED_DELAY_MS = 3000L
+        const val FIXED_COOLDOWN_MS = 15000L
+    }
+
     val selectedApps: Flow<Set<String>> = context.dataStore.data.map { prefs ->
         prefs[Keys.SELECTED_APPS] ?: emptySet()
     }
 
     val enabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
-        prefs[Keys.ENABLED] ?: false
+        prefs[Keys.ENABLED] ?: true
     }
 
     val burstN: Flow<Int> = context.dataStore.data.map { prefs ->
@@ -43,14 +48,6 @@ class SettingsStore @Inject constructor(
 
     val burstWindowSec: Flow<Int> = context.dataStore.data.map { prefs ->
         prefs[Keys.BURST_WINDOW_SEC] ?: 10
-    }
-
-    val delayMs: Flow<Long> = context.dataStore.data.map { prefs ->
-        prefs[Keys.DELAY_MS] ?: 2000L
-    }
-
-    val cooldownMs: Flow<Long> = context.dataStore.data.map { prefs ->
-        prefs[Keys.COOLDOWN_MS] ?: 2000L
     }
 
     val snoozeUntil: Flow<Long> = context.dataStore.data.map { prefs ->
@@ -81,14 +78,6 @@ class SettingsStore @Inject constructor(
         context.dataStore.edit { it[Keys.BURST_WINDOW_SEC] = sec }
     }
 
-    suspend fun setDelayMs(ms: Long) {
-        context.dataStore.edit { it[Keys.DELAY_MS] = ms }
-    }
-
-    suspend fun setCooldownMs(ms: Long) {
-        context.dataStore.edit { it[Keys.COOLDOWN_MS] = ms }
-    }
-
     suspend fun setSnoozeUntil(epochMs: Long) {
         context.dataStore.edit { it[Keys.SNOOZE_UNTIL] = epochMs }
     }
@@ -117,8 +106,8 @@ class SettingsStore @Inject constructor(
         context.dataStore.edit { prefs ->
             prefs[Keys.BURST_N] = 5
             prefs[Keys.BURST_WINDOW_SEC] = 10
-            prefs[Keys.DELAY_MS] = 2000L
-            prefs[Keys.COOLDOWN_MS] = 2000L
+            prefs[Keys.DELAY_MS] = FIXED_DELAY_MS
+            prefs[Keys.COOLDOWN_MS] = FIXED_COOLDOWN_MS
         }
     }
 }
